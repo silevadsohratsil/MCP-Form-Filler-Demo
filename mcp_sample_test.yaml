@@ -1,0 +1,28 @@
+# .github/workflows/mcp_sample_test.yml
+name: E2E Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama serve &
+          ollama pull llama3.1:8b
+      - name: Install dependencies
+        run: |
+          pip install fastmcp browser-use langchain-ollama
+          pip install uv
+          uvx browser-use install
+      - name: Start application
+        run: |
+          npm start &
+          sleep 20  # Wait for app to start
+      - name: Run example MCP tests
+        run: python test_example_MCP.py
